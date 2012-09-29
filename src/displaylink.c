@@ -46,8 +46,10 @@ TODO:
 
 #include "fb.h"
 
+#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6
 #include "xf86Resources.h"
 #include "xf86RAC.h"
+#endif
 
 #include "fbdevhw.h"
 
@@ -281,11 +283,11 @@ DisplayLinkPreInit(ScrnInfoPtr pScrn, int flags)
 	fPtr = DLPTR(pScrn);
 
 	fPtr->pEnt = xf86GetEntityInfo(pScrn->entityList[0]);
-
+#ifndef XSERVER_LIBPCIACCESS
 	pScrn->racMemFlags = RAC_FB | RAC_COLORMAP | RAC_CURSOR | RAC_VIEWPORT;
 	/* XXX Is this right?  Can probably remove RAC_FB */
 	pScrn->racIoFlags = RAC_FB | RAC_COLORMAP | RAC_CURSOR | RAC_VIEWPORT;
-
+#endif
 	/* open device */
 	if (!fbdevHWInit(pScrn,NULL,xf86FindOptionValue(fPtr->pEnt->device->options,"fbdev")))
 		return FALSE;
