@@ -17,7 +17,7 @@
 
 AC_PREREQ(2.57)
 AC_INIT([xf86-video-displaylink],
-        0.0.1,
+        0.4,
         [],
         xf86-video-displaylink)
 
