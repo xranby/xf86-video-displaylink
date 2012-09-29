@@ -45,6 +45,7 @@ TODO:
 #include "xf86cmap.h"
 
 #include "fb.h"
+#include "compat-api.h"
 
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6
 #include "xf86Resources.h"
@@ -59,9 +60,8 @@ static const OptionInfoRec * DisplayLinkAvailableOptions(int chipid, int busid);
 static void	DisplayLinkIdentify(int flags);
 static Bool	DisplayLinkProbe(DriverPtr drv, int flags);
 static Bool	DisplayLinkPreInit(ScrnInfoPtr pScrn, int flags);
-static Bool	DisplayLinkScreenInit(int Index, ScreenPtr pScreen, int argc,
-				char **argv);
-static Bool	DisplayLinkCloseScreen(int scrnIndex, ScreenPtr pScreen);
+static Bool	DisplayLinkScreenInit(SCREEN_INIT_ARGS_DECL);
+static Bool	DisplayLinkCloseScreen(CLOSE_SCREEN_ARGS_DECL);
 
 static Bool	DisplayLinkDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op,
 				pointer ptr);
@@ -382,11 +382,13 @@ DisplayLinkPreInit(ScrnInfoPtr pScrn, int flags)
 
 	/* check for edid incongruences (as when udlfb is loaded before attaching a monitor) */
 	pScrn->currentMode = fbdevHWGetBuildinMode(pScrn) ;
-	
+/**	
 	pScrn->modes = fPtr->output->funcs->get_modes(fPtr->output);
+
 	if (pScrn->modes->HDisplay <= pScrn->currentMode->HDisplay && pScrn->modes->VDisplay <= pScrn->currentMode->VDisplay) {
 		pScrn->currentMode = pScrn->modes ;
 	}
+**/
 	pScrn->virtualX = pScrn->currentMode->HDisplay ;
 	pScrn->virtualY = pScrn->currentMode->VDisplay ;
 
@@ -408,7 +410,7 @@ DisplayLinkPreInit(ScrnInfoPtr pScrn, int flags)
 static Bool
 DisplayLinkCreateScreenResources(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     DisplayLinkPtr fPtr = DLPTR(pScrn);
     Bool ret;
 
@@ -441,7 +443,7 @@ DisplayLinkCreateScreenResources(ScreenPtr pScreen)
 static Bool
 DisplayLinkDamageInit(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     DisplayLinkPtr fPtr = DLPTR(pScrn);
     
 
@@ -453,9 +455,9 @@ DisplayLinkDamageInit(ScreenPtr pScreen)
 
 
 static Bool
-DisplayLinkScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
+DisplayLinkScreenInit(SCREEN_INIT_ARGS_DECL)
 {
-	ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+	ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
 	DisplayLinkPtr fPtr = DLPTR(pScrn);
 	VisualPtr visual;
 	int init_picture = 0;
@@ -464,7 +466,7 @@ DisplayLinkScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
 
 	if (NULL == (fPtr->fbmem = fbdevHWMapVidmem(pScrn))) {
-	        xf86DrvMsg(scrnIndex,X_ERROR,"mapping of video memory"
+	        xf86DrvMsg(pScrn->scrnIndex,X_ERROR,"mapping of video memory"
 			   " failed\n");
 		return FALSE;
 	}
@@ -473,18 +475,18 @@ DisplayLinkScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 	fbdevHWSave(pScrn);
 
 	fbdevHWSaveScreen(pScreen, SCREEN_SAVER_ON);
-	fbdevHWAdjustFrame(scrnIndex,0,0,0);
+	fbdevHWAdjustFrame(ADJUST_FRAME_ARGS(pScrn,0,0));
 
 	miClearVisualTypes();
 	if (!miSetVisualTypes(pScrn->depth, TrueColorMask, pScrn->rgbBits, TrueColor)) {
-		xf86DrvMsg(scrnIndex,X_ERROR,"visual type setup failed"
+		xf86DrvMsg(pScrn->scrnIndex,X_ERROR,"visual type setup failed"
 			   " for %d bits per pixel [1]\n",
 			   pScrn->bitsPerPixel);
 		return FALSE;
 	}
 
 	if (!miSetPixmapDepths()) {
-	  xf86DrvMsg(scrnIndex,X_ERROR,"pixmap depth setup failed\n");
+	  xf86DrvMsg(pScrn->scrnIndex,X_ERROR,"pixmap depth setup failed\n");
 	  return FALSE;
 	}
 
@@ -519,7 +521,7 @@ DisplayLinkScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 			   "Render extension initialisation failed\n");
 
 	if (!DisplayLinkDamageInit(pScreen)) {
-	    xf86DrvMsg(scrnIndex, X_ERROR,
+	    xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
 		       "damage initialization failed\n");
 	    return FALSE;
 	}
@@ -534,7 +536,7 @@ DisplayLinkScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
 	/* colormap */
 	if (!miCreateDefColormap(pScreen)) {
-			xf86DrvMsg(scrnIndex, X_ERROR,
+			xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                                    "internal error: miCreateDefColormap failed "
 				   "in DisplayLinkScreenInit()\n");
 		return FALSE;
@@ -559,9 +561,9 @@ DisplayLinkScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 }
 
 static Bool
-DisplayLinkCloseScreen(int scrnIndex, ScreenPtr pScreen)
+DisplayLinkCloseScreen(CLOSE_SCREEN_ARGS_DECL)
 {
-	ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+	ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
 	DisplayLinkPtr fPtr = DLPTR(pScrn);
 	
 	DamageUnregister(&fPtr->pPixmap->drawable, fPtr->pDamage);
@@ -574,7 +576,7 @@ DisplayLinkCloseScreen(int scrnIndex, ScreenPtr pScreen)
 
 	pScreen->CreateScreenResources = fPtr->CreateScreenResources;
 	pScreen->CloseScreen = fPtr->CloseScreen;
-	return (*pScreen->CloseScreen)(scrnIndex, pScreen);
+	return (*pScreen->CloseScreen)(CLOSE_SCREEN_ARGS);
 }
 
 
@@ -601,8 +603,8 @@ DisplayLinkDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer ptr)
 static void
 DLBlockHandler(pointer data, OSTimePtr pTimeout, pointer pRead)
 {
-    ScreenPtr pScreen = (ScreenPtr) data;
-	ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+	ScreenPtr pScreen = (ScreenPtr) data;
+	ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
         DisplayLinkPtr fPtr = DLPTR(pScrn);
 	RegionPtr pRegion;
 	int coords[4];
