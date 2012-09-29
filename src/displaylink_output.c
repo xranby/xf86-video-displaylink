@@ -105,7 +105,7 @@ displaylink_output_init(ScrnInfoPtr pScrn)
 	xf86OutputPtr output;
 	DisplayLinkPtr fPtr = DLPTR(pScrn);
 
-    	fPtr->output = xf86OutputCreate (pScrn, &displaylink_output_funcs, (char *) fbdevHWGetName(pScrn));
+    	fPtr->output = xf86OutputCreate (pScrn, &displaylink_output_funcs, "udlfb");
 	if (fPtr->output) {
 		fPtr->output->possible_crtcs |= (1 << 0);
 		fPtr->output->crtc = fPtr->crtc;

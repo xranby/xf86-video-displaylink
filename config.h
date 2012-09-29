@@ -50,25 +50,28 @@
 #define PACKAGE_NAME "xf86-video-displaylink"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "xf86-video-displaylink 0.0.1"
+#define PACKAGE_STRING "xf86-video-displaylink 0.4"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "xf86-video-displaylink"
 
+/* Define to the home page for this package. */
+#define PACKAGE_URL ""
+
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "0.0.1"
+#define PACKAGE_VERSION "0.4"
 
 /* Major version of this package */
 #define PACKAGE_VERSION_MAJOR 0
 
 /* Minor version of this package */
-#define PACKAGE_VERSION_MINOR 0
+#define PACKAGE_VERSION_MINOR 4
 
 /* Patch version of this package */
-#define PACKAGE_VERSION_PATCHLEVEL 1
+#define PACKAGE_VERSION_PATCHLEVEL 0
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "0.0.1"
+#define VERSION "0.4"
