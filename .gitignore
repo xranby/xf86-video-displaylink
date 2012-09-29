@@ -1,1 +1,5 @@
 *.swp
+Makefile
+*.lo
+*.la
+*~
