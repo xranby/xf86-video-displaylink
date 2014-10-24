@@ -39,7 +39,6 @@ TODO:
 #include "xf86_OSproc.h"
 
 #include "mipointer.h"
-#include "mibstore.h"
 #include "micmap.h"
 #include "colormapst.h"
 #include "xf86cmap.h"
@@ -528,7 +527,6 @@ DisplayLinkScreenInit(SCREEN_INIT_ARGS_DECL)
 
 
 	xf86SetBlackWhitePixels(pScreen);
-	miInitializeBackingStore(pScreen);
 	xf86SetBackingStore(pScreen);
 
 	/* software cursor */
@@ -566,7 +564,7 @@ DisplayLinkCloseScreen(CLOSE_SCREEN_ARGS_DECL)
 	ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
 	DisplayLinkPtr fPtr = DLPTR(pScrn);
 	
-	DamageUnregister(&fPtr->pPixmap->drawable, fPtr->pDamage);
+	DamageUnregister(fPtr->pDamage);
 	RemoveBlockAndWakeupHandlers(DLBlockHandler, DLWakeupHandler,
                                  (pointer) pScreen);
 	fbdevHWRestore(pScrn);
