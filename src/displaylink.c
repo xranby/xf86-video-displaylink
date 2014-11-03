@@ -153,8 +153,7 @@ DisplayLinkGetRec(ScrnInfoPtr pScrn)
 {
 	if (pScrn->driverPrivate != NULL)
 		return TRUE;
-	
-	pScrn->driverPrivate = xnfcalloc(sizeof(DisplayLinkRec), 1);
+	pScrn->driverPrivate = XNFcalloc((unsigned long)(sizeof(DisplayLinkRec)));
 	return TRUE;
 }
 
@@ -163,7 +162,7 @@ DisplayLinkFreeRec(ScrnInfoPtr pScrn)
 {
 	if (pScrn->driverPrivate == NULL)
 		return;
-	xfree(pScrn->driverPrivate);
+	free(pScrn->driverPrivate);
 	pScrn->driverPrivate = NULL;
 }
 
@@ -235,7 +234,7 @@ DisplayLinkProbe(DriverPtr drv, int flags)
 		       "using %s\n", dev ? dev : "default device");
 		}
 	}
-	xfree(devSections);
+	free(devSections);
 	return foundScreen;
 }
 
@@ -349,7 +348,7 @@ DisplayLinkPreInit(ScrnInfoPtr pScrn, int flags)
 
 	/* handle options */
 	xf86CollectOptions(pScrn, NULL);
-	if (!(fPtr->Options = xalloc(sizeof(DisplayLinkOptions))))
+	if (!(fPtr->Options = malloc(sizeof(DisplayLinkOptions))))
 		return FALSE;
 	memcpy(fPtr->Options, DisplayLinkOptions, sizeof(DisplayLinkOptions));
 	xf86ProcessOptions(pScrn->scrnIndex, fPtr->pEnt->device->options, fPtr->Options);
